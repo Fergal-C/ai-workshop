@@ -1,4 +1,5 @@
 import { fetchIssues } from "./github.js";
+import { triageIssues } from "./triage.js";
 
 export async function main(): Promise<void> {
   const result = await fetchIssues();
@@ -8,11 +9,20 @@ export async function main(): Promise<void> {
     return;
   }
 
-  console.log(`Fetched ${result.issues.length} issue(s):\n`);
-  for (const issue of result.issues) {
-    console.log(`#${issue.number} — ${issue.title}`);
-    console.log(`  Labels: ${result.issues.length > 0 && issue.labels.length > 0 ? issue.labels.join(", ") : "(none)"}`);
-    console.log(`  Body preview: ${issue.body.slice(0, 120).replace(/\n/g, " ")}...`);
+  console.log(`Fetched ${result.issues.length} issues. Running triage...`);
+
+  const triageResult = await triageIssues(result.issues);
+
+  if (triageResult.error) {
+    console.error("Triage failed:", triageResult.error);
+    return;
+  }
+
+  console.log("\n=== Triage Results ===\n");
+
+  for (const issue of triageResult.issues) {
+    console.log(`#${issue.number} [${issue.category}] [${issue.status}] — ${issue.title}`);
+    console.log(`  ${issue.summary}`);
     console.log();
   }
 }
