@@ -17,7 +17,9 @@ type FetchIssuesResult =
   | { issues: Issue[] }
   | { error: string; issues: [] };
 
-export async function fetchIssues(): Promise<FetchIssuesResult> {
+export async function fetchIssues(
+  octokitClient: Octokit = octokit,
+): Promise<FetchIssuesResult> {
   if (process.env.USE_MOCK === "1") {
     const raw = readFileSync(resolve("mock/issues.json"), "utf-8");
     const issues: Issue[] = JSON.parse(raw);
@@ -25,7 +27,7 @@ export async function fetchIssues(): Promise<FetchIssuesResult> {
   }
 
   try {
-    const response = await octokit.rest.issues.listForRepo({
+    const response = await octokitClient.rest.issues.listForRepo({
       owner: "facebook",
       repo: "react",
       state: "open",

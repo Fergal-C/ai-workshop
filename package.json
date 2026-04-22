@@ -7,7 +7,9 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsc --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run build && node --test 'dist/**/*.test.js'",
+    "test:dev": "node --import tsx/esm --test 'src/**/*.test.ts'",
+    "test:eval": "node --import tsx/esm --test 'src/**/*.eval.test.ts'"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   }
 }

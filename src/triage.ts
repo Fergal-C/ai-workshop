@@ -81,7 +81,7 @@ Write in the third person, present tense.
 
 Return a structured JSON response with all issues included. For each issue include: number, title (the original GitHub issue title, unmodified), category, status, and summary.`;
 
-function formatIssues(issues: Issue[]): string {
+export function formatIssues(issues: Issue[]): string {
   return issues
     .map((issue) => {
       const labels = issue.labels.length > 0 ? issue.labels.join(", ") : "none";
@@ -97,7 +97,10 @@ function formatIssues(issues: Issue[]): string {
     .join("\n");
 }
 
-export async function triageIssues(issues: Issue[]): Promise<TriageResult> {
+export async function triageIssues(
+  issues: Issue[],
+  anthropicClient: Anthropic = client,
+): Promise<TriageResult> {
   if (process.env.USE_MOCK === "1") {
     const raw = readFileSync(resolve("mock/issues.json"), "utf-8");
     const all: Array<{
@@ -120,7 +123,7 @@ export async function triageIssues(issues: Issue[]): Promise<TriageResult> {
   try {
     const userMessage = formatIssues(issues);
 
-    const message = await client.messages.parse({
+    const message = await anthropicClient.messages.parse({
       model: "claude-sonnet-4-6",
       max_tokens: 8192,
       system: SYSTEM_PROMPT,

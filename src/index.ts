@@ -1,9 +1,13 @@
-import { fetchIssues } from "./github.js";
-import { triageIssues } from "./triage.js";
+import { fetchIssues as defaultFetchIssues } from "./github.js";
+import { triageIssues as defaultTriageIssues } from "./triage.js";
 import { writeFileSync } from "fs";
+import { fileURLToPath } from "url";
 
-export async function main(): Promise<void> {
-  const result = await fetchIssues();
+export async function main(
+  fetchFn: typeof defaultFetchIssues = defaultFetchIssues,
+  triageFn: typeof defaultTriageIssues = defaultTriageIssues,
+): Promise<void> {
+  const result = await fetchFn();
 
   if ("error" in result) {
     console.error("Failed to fetch issues:", result.error);
@@ -12,7 +16,7 @@ export async function main(): Promise<void> {
 
   console.log(`Fetched ${result.issues.length} issues. Running triage...`);
 
-  const triageResult = await triageIssues(result.issues);
+  const triageResult = await triageFn(result.issues);
 
   if (triageResult.error) {
     console.error("Triage failed:", triageResult.error);
@@ -35,4 +39,6 @@ export async function main(): Promise<void> {
   console.log(`Results saved to ${outFile}`);
 }
 
-main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}
