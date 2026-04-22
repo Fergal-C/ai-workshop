@@ -1,5 +1,6 @@
 import { fetchIssues } from "./github.js";
 import { triageIssues } from "./triage.js";
+import { writeFileSync } from "fs";
 
 export async function main(): Promise<void> {
   const result = await fetchIssues();
@@ -18,13 +19,20 @@ export async function main(): Promise<void> {
     return;
   }
 
-  console.log("\n=== Triage Results ===\n");
+  const lines: string[] = ["=== Triage Results ===", ""];
 
   for (const issue of triageResult.issues) {
-    console.log(`#${issue.number} [${issue.category}] [${issue.status}] — ${issue.title}`);
-    console.log(`  ${issue.summary}`);
-    console.log();
+    lines.push(`#${issue.number} [${issue.category}] [${issue.status}] — ${issue.title}`);
+    lines.push(`  ${issue.summary}`);
+    lines.push("");
   }
+
+  const output = lines.join("\n");
+  console.log("\n" + output);
+
+  const outFile = "output.txt";
+  writeFileSync(outFile, output);
+  console.log(`Results saved to ${outFile}`);
 }
 
 main();

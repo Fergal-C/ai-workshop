@@ -1,0 +1,62 @@
+[
+  {
+    "number": 36328,
+    "title": "throw special error if rejected promises are incorrectly instrumented",
+    "labels": ["Type: Bug"],
+    "body": "## Summary\n\nWhen a rejected Promise has its rejection reason set in the wrong field during userspace instrumentation, React throws `undefined`. This makes the root cause extremely difficult to diagnose because the thrown value carries no useful message or stack.\n\n## Proposed fix\n\nA React Core Team member is proposing a targeted fix: when we detect that the rejection reason is `undefined` but the promise has a non-undefined value on the incorrect field, we throw a generic `Error` with a useful message and callstack instead. This would apply in both dev and prod.\n\n## Reproduction\n\nSee the linked PR for a minimal reproduction script."
+  },
+  {
+    "number": 36327,
+    "title": "[compiler Bug]: AST contract violation: babel-plugin-react-compiler writes `Symbol()` into Node.loc, breaks downstream serialization (jest-worker / v8.serialize / IPC)",
+    "labels": ["Type: Bug", "Component: Compiler"],
+    "body": "## React version\n17.0.2 and 18.3.1\n\n## Steps to reproduce\n\n1. Enable babel-plugin-react-compiler in a Jest project using jest-worker.\n2. Run any test that imports a component compiled by the plugin.\n3. Observe `DataCloneError: Symbol() could not be cloned` thrown by v8.serialize during IPC.\n\n## Expected behaviour\n\nThe plugin should leave `Node.loc` as `null` (per the Babel spec) when no source location is available.\n\n## Actual behaviour\n\nThe compiler writes a `Symbol()` sentinel into `Node.loc`, violating the `babel` `Node.loc: sourceLocation | null` contract. `v8.serialize` cannot clone Symbols, so any downstream serialization (jest-worker IPC, child_process.send) throws.\n\n## Minimal reproduction\n\nhttps://github.com/example/repro-symbol-loc"
+  },
+  {
+    "number": 36326,
+    "title": ".4062073974432528:1bc6ad479913580c063b4167b20affd8_69e84e7d1ffbb16c7ee08c91.69e856871ffbb16c7ee08d36:trae CN.T(2026/4/22 13:03:03)",
+    "labels": [],
+    "body": "xxx提交PR的描述\n\n<!-- Thanks for submitting a pull request! -->\n\n## Summary\n\n<!-- Explain the **motivation** for making this change. -->"
+  },
+  {
+    "number": 36325,
+    "title": ".4062073974432528:c81495d8e3b2cf3f013cdc3214849353_69e84e7d1ffbb16c7ee08c91:trae CN.T(2026/4/22 12:29:19)",
+    "labels": [],
+    "body": "简单修改\n\n<!-- Thanks for submitting a pull request! -->\n\n## Summary\n\n<!-- Explain the **motivation** for making this change. -->"
+  },
+  {
+    "number": 36324,
+    "title": "[eslint-plugin-react-hooks] include cycle-entry segment in cyclic set",
+    "labels": ["Type: Bug", "Component: ESLint Rules"],
+    "body": "## Bug Report\n\nThe `RulesOfHooks` lint rule does not flag hooks called in the test expression of `while` or `for` loops.\n\n## Reproduction\n\n```js\nfunction Component() {\n  while (useCondition()) { // not flagged — should be an error\n    // ...\n  }\n}\n```\n\n## Root cause\n\nThe cycle-entry segment is excluded from the `cyclic` set due to an off-by-one in the `indexOf` slice. The slice starts one position too late, so the first segment of the cycle is never added to the set.\n\n## Fix\n\nA PR with new test cases (failing on `main`, passing with the fix) is attached."
+  },
+  {
+    "number": 36323,
+    "title": "Add regression tests for strictMode transition unmount cleanup",
+    "labels": ["Type: Discussion"],
+    "body": "This PR adds test-only coverage for `useEffect` cleanup behavior during StrictMode concurrent transition unmounts. There are no changes to production runtime logic.\n\nAdds:\n- 3 new test cases in ReactStrictMode-test.js\n- No changes outside of test files"
+  },
+  {
+    "number": 36321,
+    "title": "fix false hydration mismatch when client renders portal that returned null on server",
+    "labels": ["Type: Bug"],
+    "body": "## Problem\n\nWhen a component returns `null` on the server but renders a `ReactDOM.createPortal()` on the client, React incorrectly emits a hydration mismatch error.\n\n## Root cause\n\nThe portal's hydration state is not isolated from the parent container's. When the portal is encountered during client hydration, the reconciler checks the parent's hydration cursor and finds unexpected DOM nodes.\n\n## Fix\n\nProposes adding `prepareToHydrateHostPortal` and `popHydrationStateAfterPortal` helpers (mirroring the existing host instance helpers). New passing tests included.\n\n## React version\n18.3.1\n\n## Reproduction\n\nhttps://codesandbox.io/s/portal-hydration-mismatch"
+  },
+  {
+    "number": 36320,
+    "title": "Bug: typo in error message",
+    "labels": ["Type: Bug"],
+    "body": "## Description\n\nThe error message for hoisted `<style>` tags with spaces in the `href` prop misspells \"occurred\" as \"ocurred\".\n\n## Location\n\n`packages/react-dom/src/client/ReactDOMHostConfig.js`\n\n## Fix\n\nA linked PR (#36319) already corrects the spelling."
+  },
+  {
+    "number": 36318,
+    "title": "Bug: useOptimistic fails to revert when independent async actions overlap due to global scope entanglement",
+    "labels": ["Type: Bug"],
+    "body": "## Summary\n\n`useOptimistic` optimistic state fails to revert to the base state after its action completes when another unrelated async action is still pending in a different component.\n\n## Root cause\n\nThe revert mechanism in `ReactFiberAsyncAction.js` is gated on a global per-root pending action count. A slow async action in `ComponentA` increments this counter, preventing `ComponentB`'s optimistic state from reverting even after `ComponentB`'s own action has finished.\n\n## Reproduction\n\nhttps://codesandbox.io/s/useoptimistic-global-entanglement\n\n## React version\n\n19.0.0"
+  },
+  {
+    "number": 36317,
+    "title": "[verified] fix(reconciler): recheck store snapshot after subscribe",
+    "labels": ["Type: Bug"],
+    "body": "## Problem\n\nWhen `useSyncExternalStore` is used with Suspense and StrictMode, the remount path skips the post-subscribe snapshot re-check. This can cause the hook to miss a store mutation that occurs during `subscribe(handleStoreChange)`.\n\n## Steps to reproduce\n\n1. Use `useSyncExternalStore` inside a Suspense boundary with StrictMode enabled.\n2. Have the store update synchronously inside the `subscribe` callback.\n3. Observe that the UI reflects stale data until the next render.\n\n## Fix\n\nRe-check the snapshot immediately after `subscribe(handleStoreChange)` returns.\nRelated: #35550\n\n## React version\n18.3.1"
+  }
+]
