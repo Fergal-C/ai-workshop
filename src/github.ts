@@ -1,4 +1,6 @@
 import { Octokit } from "@octokit/rest";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -16,6 +18,12 @@ type FetchIssuesResult =
   | { error: string; issues: [] };
 
 export async function fetchIssues(): Promise<FetchIssuesResult> {
+  if (process.env.USE_MOCK === "1") {
+    const raw = readFileSync(resolve("mock/issues.json"), "utf-8");
+    const issues: Issue[] = JSON.parse(raw);
+    return { issues };
+  }
+
   try {
     const response = await octokit.rest.issues.listForRepo({
       owner: "facebook",
