@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { z } from "zod/v4";
 
 const client = new Anthropic();
@@ -96,6 +98,25 @@ function formatIssues(issues: Issue[]): string {
 }
 
 export async function triageIssues(issues: Issue[]): Promise<TriageResult> {
+  if (process.env.USE_MOCK === "1") {
+    const raw = readFileSync(resolve("mock/issues.json"), "utf-8");
+    const all: Array<{
+      number: number;
+      title: string;
+      category: "bug" | "feature" | "other";
+      status: "actionable" | "noise";
+      summary: string;
+    }> = JSON.parse(raw);
+    const incoming = new Set(issues.map((i) => i.number));
+    return {
+      issues: all
+        .filter((item) => incoming.has(item.number))
+        .map(({ number, title, category, status, summary }) => ({
+          number, title, category, status, summary,
+        })),
+    };
+  }
+
   try {
     const userMessage = formatIssues(issues);
 

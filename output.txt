@@ -1,31 +1,31 @@
 === Triage Results ===
 
-#36328 [bug] [actionable] — throw special error if rejected promises are incorrectly instrumented
-  When a rejected Promise has its rejection reason set in the wrong field during userspace instrumentation, React throws `undefined`, making the root cause very difficult to diagnose. A React Core Team member is proposing a targeted fix that throws a generic error with a useful callstack in both dev and prod.
+#36329 [bug] [actionable] — [compiler Bug]: do not remove comments during compilation
+  The React compiler strips comments from source code during compilation, which breaks downstream tools that rely on those comments for their behavior. A playground reproduction is provided, and the issue is especially impactful because the compiler plugin is recommended to run before other babel plugins.
+
+#36328 [other] [noise] — throw special error if rejected promises are incorrectly instrumented
+  This appears to be an internal React Core Team change/PR description rather than a user-filed bug report. It describes an improvement to error messaging when rejected promises are incorrectly instrumented, and is not a standard actionable issue requiring triage.
 
 #36327 [bug] [actionable] — [compiler Bug]: AST contract violation: babel-plugin-react-compiler writes `Symbol()` into Node.loc, breaks downstream serialization (jest-worker / v8.serialize / IPC)
-  The React compiler uses a `Symbol()` sentinel for missing source locations and writes it into AST `Node.loc` fields, violating the `babel` `Node.loc: sourceLocation | null` contract and causing `v8.serialize` / `child_process.send` to throw `Symbol() could not be cloned`. A minimal standalone reproduction repository is provided demonstrating the failure.
+  The babel-plugin-react-compiler sets a `Symbol()` sentinel value into the `loc` field of synthesized AST nodes, violating the `Node.loc: sourceLocation | null` contract and causing `v8.serialize` and `child_process.send` to throw because symbols cannot be structured-cloned. A minimal standalone reproduction repository is provided.
 
 #36326 [other] [noise] — .4062073974432528:1bc6ad479913580c063b4167b20affd8_69e84e7d1ffbb16c7ee08c91.69e856871ffbb16c7ee08d36.69e856877d209b4c504d028b:trae CN.T(2026/4/22 13:03:03)
-  This issue has an auto-generated, opaque title and contains what appears to be a machine-generated or bot-submitted PR description in Chinese with no meaningful context. It does not represent an actionable bug report or feature request.
+  This appears to be a garbled or bot-generated submission with an unreadable title and no coherent issue description. It does not constitute an actionable bug report or feature request.
 
 #36325 [other] [noise] — .4062073974432528:c81495d8e3b2cf3f013cdc3214849353_69e84e7d1ffbb16c7ee08c91.69e84e9f1ffbb16c7ee08c93.69e84e9f7d209b4c504d0289:trae CN.T(2026/4/22 12:29:19)
-  This issue has an auto-generated, opaque title and an essentially empty PR template body with only a brief Chinese summary and no reproduction or test details. It does not represent an actionable bug report or feature request.
+  This is a garbled or bot-generated submission with an unreadable title and a body that appears to be a partial PR template with no meaningful content. It does not constitute an actionable issue.
 
 #36324 [bug] [actionable] — [eslint-plugin-react-hooks] include cycle-entry segment in cyclic set
-  The `RulesOfHooks` lint rule fails to flag hooks called in the test expression of `while` or `for` loops because the cycle-entry segment is excluded from the `cyclic` set due to an off-by-one in the `indexOf` slice. The submitter provides a concrete code example, explains the root cause, and includes new test cases that fail on `main` but pass with the proposed fix.
+  The `countPathsFromStart`/`countPathsToEnd` logic in the Rules of hooks eslint plugin fails to include the cycle-entry segment in the cyclic set, causing hooks used directly in `while` or `for` loop conditions to go unreported. A fix with tests is provided, demonstrating the off-by-one error in the `indexOf` slice.
 
-#36323 [other] [noise] — Add regression tests for strictMode transition unmount cleanup
-  This PR adds test-only coverage for `useEffect` cleanup behavior during StrictMode concurrent transition unmounts, with no changes to production runtime logic. It is a test-hardening contribution rather than a bug report or feature request, and does not identify a gap that would cause developers to misuse the library.
+#36323 [other] [noise] — Add regression tests for StrictMode transition unmount cleanup
+  This is a PR description adding regression tests for effect cleanup during StrictMode transition unmounts, with no production logic changes. As a test-only contribution with no new bug or feature, it is not a standard issue to triage.
 
 #36321 [bug] [actionable] — fix false hydration mismatch when client renders portal that returned null on server
-  When a component returns `null` on the server but renders a `ReactDOM.createPortal()` on the client, React incorrectly emits a hydration mismatch error because the portal's hydration state is not isolated from the parent container's. The PR proposes adding `prepareToHydrateHostPortal` and `popHydrationStateAfterPortal` helpers and includes new passing tests.
+  When a component returns `null` on the server but renders a `ReactDOM.createPortal()` on the client, React incorrectly emits a hydration mismatch error because portal children attempt to claim hydration instances from the parent container's server nodes. A fix and tests are provided targeting `ReactFiberHydrationContext`.
 
-#36320 [bug] [actionable] — Bug: typo in error message
-  An error message in React misspells "occurred" as "ocurred" in the warning about spaces in the `href` prop for hoisted `<style>` tags. A linked PR (#36319) already provides the fix.
+#36320 [bug] [actionable] — bug: typo in error message
+  An error message in React's style-hoisting code contains the misspelling "ocurred" instead of "occurred". A linked PR (#36319) already provides the fix.
 
-#36318 [bug] [actionable] — Bug: useOptimistic fails to revert when independent async actions overlap due to global scope entanglement
-  The `useOptimistic` revert mechanism is gated on a global per-root pending action count in `ReactFiberAsyncAction.js`, so a slow async action in one component prevents an unrelated component's optimistic UI from reverting even after its own action completes. A CodeSandbox reproduction is provided demonstrating the cross-component entanglement issue.
-
-#36317 [bug] [actionable] — [verified] fix(reconciler): recheck store snapshot after subscribe
-  When `useSyncExternalStore` is used with `suspense` and `StrictMode`, a remount path skips the post-subscribe snapshot re-check, which can cause the hook to miss a store mutation that occurs during `subscribe()`. The PR fixes this by re-checking the snapshot immediately after `subscribe(handleStoreChange)` returns and references a related issue (#35550).
+#36318 [bug] [actionable] — bug: useOptimistic fails to revert when independent async actions overlap due to global scope entanglement
+  The `useOptimistic` revert mechanism is gated on a global per-root async action reference count in `ReactFiberAsyncAction.js`, so a slow action in one component can block optimistic UI from reverting in an entirely unrelated component. A CodeSandbox reproduction is provided demonstrating the entanglement issue.
